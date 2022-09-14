@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trackeador</title>
+</head>
+<body>
+    <form action="#">
+        <label for="apiKey">Clave API: 
+            <input type="text" id="apiKey">
+        </label>        
+        <label for="trackingNumber">Número de paquete: 
+            <input type="text" id="trackingNumber">
+        </label>
+        <button id="check">Check</button>
+    </form>
+    <div>
+        <p id="status">API: </p>
+        <p id="statusPacket">Estado del paquete: </p>
+        <p id="data">Datos: </p>
+    </div>
+    <script>
+
+        document.getElementById('check').addEventListener('click', () => {
+            apiKey = document.getElementById('apiKey').value
+            trackingNumber = document.getElementById('trackingNumber').value
+            url = "https://api-eu.dhl.com/track/shipments?trackingNumber=" + trackingNumber
+            
+            fetch(url, {
+                headers: {
+                    Accept: "application/json",
+                    "DHL-API-KEY": apiKey,
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Request failed with status ${response.status}`)
+                }
+                document.getElementById('status').innerHTML += response.status
+                return response.json()
+            })
+            .then(data => {
+                console.log(data.shipments[0])
+                document.getElementById('statusPacket').innerHTML += data.shipments[0].status["statusCode"]
+                for (let i = 0; i < data.shipments[0].events.length; i++) {
+                    document.getElementById('data').innerHTML += data.shipments[0].events[i].status
+                }
+            })
+            .catch(error => console.log(error))
+        })
+    </script>
+</body>
+</html>
